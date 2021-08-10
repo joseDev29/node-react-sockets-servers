@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MiniChat</title>
+    <title>Bands</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -13,30 +13,7 @@
     />
   </head>
   <body>
-    <div class="container">
-      <h1>MiniChat</h1>
-      <hr />
-
-      <form id="myForm">
-        <div class="row">
-          <div class="col-8">
-            <input
-              type="text"
-              name="message"
-              id="message"
-              class="form-control"
-            />
-          </div>
-          <div class="col-4">
-            <button class="btn btn-primary">Enviar</button>
-          </div>
-        </div>
-      </form>
-
-      <div class="row">
-        <ul class="col" id="myMessages" style="list-style: none"></ul>
-      </div>
-    </div>
+    <h1>Hello</h1>
 
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"
@@ -45,29 +22,13 @@
       referrerpolicy="no-referrer"
     ></script>
     <script>
-      const socket = io("https://node-basic-socket-server.herokuapp.com/");
-      socket.on("welcome-message", (data) => {
-        console.log("Server emmit :", data);
-      });
+      const socket = io("http://localhost:6005");
 
-      const form = document.querySelector("#myForm");
-      const myMessages = document.querySelector("#myMessages");
-      const message = document.querySelector("#message");
+      let bands = [];
 
-      socket.on("message-from-server", (data) => {
-        myMessages.insertAdjacentHTML(
-          "beforeend",
-          `
-            <li>${data}</li>
-        `
-        );
-      });
-
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const newMessage = message.value.trim();
-        socket.emit("message-to-server", newMessage);
-        console.log("send message");
+      socket.on("current-bands", (data) => {
+        bands = data;
+        console.log(bands);
       });
     </script>
   </body>

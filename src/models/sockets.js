@@ -1,6 +1,10 @@
+const BandList = require("./band-list");
+
 class Sockets {
   constructor(io) {
     this.io = io;
+
+    this.bandList = new BandList();
 
     this.socketEvents();
   }
@@ -10,17 +14,26 @@ class Sockets {
     this.io.on("connection", (socket) => {
       console.log("client connected, socket ID : ", socket.id);
 
-      //emite solo al cliente conectado a ese socket
-      socket.emit("welcome-message", {
-        message: "Hello user, welcome to basic socket server",
-        date: new Date(),
+      socket.emit("current-bands", this.bandList.getBands());
+
+      socket.on("vote-band", (id) => {
+        this.bandList.increaseVotes(id);
+        this.io.emit("current-bands", this.bandList.getBands());
       });
 
-      socket.on("message-to-server", (data) => {
-        console.log("send message");
+      socket.on("delete-band", (id) => {
+        this.bandList.removeBands(id);
+        this.io.emit("current-bands", this.bandList.getBands());
+      });
 
-        //emite a todos los clientes conectados
-        this.io.emit("message-from-server", data);
+      socket.on("change-name-band", ({ id, name }) => {
+        this.bandList.changeName(id, name);
+        this.io.emit("current-bands", this.bandList.getBands());
+      });
+
+      socket.on("create-band", ({ name }) => {
+        this.bandList.addBand(name);
+        this.io.emit("current-bands", this.bandList.getBands());
       });
     });
   }
