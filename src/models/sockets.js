@@ -1,10 +1,10 @@
-const BandList = require("./band-list");
+const TicketList = require("./ticket-list");
 
 class Sockets {
   constructor(io) {
     this.io = io;
 
-    this.bandList = new BandList();
+    this.ticketList = new TicketList();
 
     this.socketEvents();
   }
@@ -14,26 +14,16 @@ class Sockets {
     this.io.on("connection", (socket) => {
       console.log("client connected, socket ID : ", socket.id);
 
-      socket.emit("current-bands", this.bandList.getBands());
-
-      socket.on("vote-band", (id) => {
-        this.bandList.increaseVotes(id);
-        this.io.emit("current-bands", this.bandList.getBands());
+      socket.on("create-ticket", (data, callback) => {
+        const newTicket = this.ticketList.createTicket();
+        callback(newTicket);
       });
 
-      socket.on("delete-band", (id) => {
-        this.bandList.removeBands(id);
-        this.io.emit("current-bands", this.bandList.getBands());
-      });
+      socket.on("next-ticket-work", ({ agent, desk }, callback) => {
+        const yourTicket = this.ticketList.assignTicket(agent, desk);
+        callback(yourTicket);
 
-      socket.on("change-name-band", ({ id, name }) => {
-        this.bandList.changeName(id, name);
-        this.io.emit("current-bands", this.bandList.getBands());
-      });
-
-      socket.on("create-band", ({ name }) => {
-        this.bandList.addBand(name);
-        this.io.emit("current-bands", this.bandList.getBands());
+        this.io.emit("asigned-ticket", this.ticketList.last13);
       });
     });
   }
