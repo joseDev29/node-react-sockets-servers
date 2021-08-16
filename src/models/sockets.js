@@ -1,10 +1,10 @@
-const TicketList = require("./ticket-list");
+const MarkerList = require("./marker-list");
 
 class Sockets {
   constructor(io) {
     this.io = io;
 
-    this.ticketList = new TicketList();
+    this.markers = new MarkerList();
 
     this.socketEvents();
   }
@@ -14,16 +14,18 @@ class Sockets {
     this.io.on("connection", (socket) => {
       console.log("client connected, socket ID : ", socket.id);
 
-      socket.on("create-ticket", (data, callback) => {
-        const newTicket = this.ticketList.createTicket();
-        callback(newTicket);
+      socket.emit("active-markers", this.markers.actives);
+
+      socket.on("create-marker", (marker) => {
+        this.markers.addMarker(marker);
+        //broadcast emite a todos los clientes menos al emisor
+        socket.broadcast.emit("create-marker", marker);
       });
 
-      socket.on("next-ticket-work", ({ agent, desk }, callback) => {
-        const yourTicket = this.ticketList.assignTicket(agent, desk);
-        callback(yourTicket);
+      socket.on("updated-marker", (marker) => {
+        this.markers.updateMarker(marker);
 
-        this.io.emit("asigned-ticket", this.ticketList.last13);
+        socket.broadcast.emit("updated-marker", marker);
       });
     });
   }

@@ -24,11 +24,6 @@ class Server {
   middlewares() {
     this.app.use(express.static(path.resolve(__dirname, "../public")));
     this.app.use(cors());
-    this.app.get("/last-tickets", (req, res) => {
-      return res.json({
-        tickets: this.sockets.ticketList.last13,
-      });
-    });
   }
 
   execute() {
